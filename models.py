@@ -52,6 +52,9 @@ class BaseModel:
     def _draw_surface_data(self, show_wireframe: bool, show_face: bool):
         for face in self.faces:
             for index, vert_index in enumerate(face):
+                if len(face) == 2 and index == 1:
+                    break
+                
                 v1 = self.vertices[vert_index]
                 v2 = self.vertices[face[(index + 1) % len(face)]]
                 

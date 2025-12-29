@@ -41,6 +41,7 @@ while True:
     
     
     screen.blit(font.render(str(int(clock.get_fps())), False, "White"), (10, 10))
+    
     pygame.display.update()
     screen.fill("black")
     clock.tick(60)

@@ -1,11 +1,26 @@
+from dataclasses import dataclass
 import math
 import pygame
 from constants import Number
 
-class Vec2:
+class Vector:
     def __init__(self, x: Number, y: Number):
         self.x = x
         self.y = y
+    
+    def project(self):
+        pass
+    
+    def coordinates(self):
+        pass
+    
+    def dot(self, vec: "Vector"):
+        pass
+
+
+class Vec2(Vector):
+    def __init__(self, x, y):
+        super().__init__(x, y)
         
         self.at_infinity = False
     
@@ -35,7 +50,8 @@ class Vec2:
                 return Vec2(self.x + other[0], self.y + other[1])
             elif isinstance(other, (int, float)):
                 return Vec2(self.x + other, self.y + other)
-            return NotImplemented
+            
+            raise NotImplementedError(f"Cannot not add Vec2 to '{other.__class__.__name__}'")
     def __radd__(self, other):
         return self.__add__(other)
      
@@ -47,13 +63,15 @@ class Vec2:
                 if len(other) != 2:
                     raise ValueError("Tuple must have 2 elements")
                 return Vec2(self.x - other[0], self.y - other[1])
-            return NotImplemented
+            
+            raise NotImplementedError(f"Cannot not subtract '{other.__class__.__name__}' from Vec2")
     
     def __mul__(self, other):
         if not self.at_infinity:
             if isinstance(other, (int, float)):
                 return Vec2(self.x * other, self.y * other)
-            return NotImplemented
+            
+            raise NotImplementedError(f"Cannot not multiply Vec2 with '{other.__class__.__name__}'")
     def __rmul__(self, other):
         return self.__mul__(other)
     
@@ -68,14 +86,17 @@ class Vec2:
     def coordinates(self):
         return self.x, self.y
 
-class Vec3:
+    def dot(self, vec: "Vec2"):
+        return self.x * vec.x + self.y * vec.y
+
+class Vec3(Vector):
     def __init__(self, x: Number, y: Number, z: Number):
         self._x = x
         self._y = y
         self._z = z
         
-        self.x = self._x
-        self.y = self._y
+        super().__init__(self._x, self._y)
+        
         self.z = self._z
     
     @property
@@ -129,7 +150,7 @@ class Vec3:
         elif isinstance(other, (int, float)):
             return self.__class__(self.x + other, self.y + other, self.z + other)
         
-        return NotImplemented
+        raise NotImplementedError(f"Cannot not add Vec3 to '{other.__class__.__name__}'")
     def __radd__(self, other):
         return self.__add__(other)
      
@@ -141,14 +162,15 @@ class Vec3:
                 raise ValueError("Tuple must have 3 elements")
             return Vec3(self.x - other[0], self.y - other[1], self.z - other[2])
         
-        return NotImplemented
+        raise NotImplementedError(f"Cannot not subtract '{other.__class__.__name__}' from Vec3")
     
     def __mul__(self, other):
         if isinstance(other, self.__class__):
             return self.__class__(self.x * other.x, self.y * other.y, self.z * other.z)
         elif isinstance(other, (int, float)):
             return self.__class__(self.x * other, self.y * other, self.z * other)
-        return NotImplemented
+        
+        raise NotImplementedError(f"Cannot not multiply Vec3 with '{other.__class__.__name__}'")
     def __rmul__(self, other):
         return self.__mul__(other)
     
@@ -165,6 +187,9 @@ class Vec3:
 
     def coordinates(self):
         return self.x, self.y, self.z
+    
+    def dot(self, vec: "Vec3"):
+        return self.x * vec.x + self.y * vec.y + self.z * vec.z
 
 class AngleVec3(Vec3):
     @property
@@ -209,16 +234,14 @@ class AngleVec3(Vec3):
     def z(self, value: Number):
         self._z = self._xy = value
 
+@dataclass
 class Transforms:
-    # @staticmethod
     def translate(vertex: Vec3, offset: Vec3):
         return vertex + offset
     
-    # @staticmethod
     def scale(vertex: Vec3, scale: Vec3):
         return vertex * scale
     
-    # @staticmethod
     def rotate(vertex: Vec3, angle: AngleVec3):
         x_prime1, y_prime1, z_prime1 = (
             vertex.x * math.cos(math.radians(angle.xy)) - vertex.y * math.sin(math.radians(angle.xy)),
@@ -239,4 +262,5 @@ class Transforms:
         )
         
         return Vec3(x_prime3, y_prime3, z_prime3)
+
 
